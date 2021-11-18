@@ -1,20 +1,7 @@
-
 #================#
 #    IMPORTS     #
 #================#
 
-# Internal imports
-from note import *
-
-# External imports
-#================#
-#    IMPORTS     #
-#================#
-
-# Internal imports
-from note import *
-
-# External imports
 from music21 import stream as m21stream
 from music21 import instrument as m21inst
 from music21 import note as m21note
@@ -31,8 +18,9 @@ MAX_MIDI_PROGRAM = 127
 MAX_VOLUME = 127
 MAX_OCTAVE = 7
 
-VOGAIS = ['A', 'E', 'I', 'O', 'U']
-DIGITOS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+VOWELS = ['A', 'E', 'I', 'O', 'U']
+DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+VALID_NOTES = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
 #================#
 #    CLASSES     #
@@ -47,9 +35,9 @@ class MusicParser:
         # oitava e instrumento
         self.volume = DEFAULT_VOLUME
         self.octave = DEFAULT_OCTAVE
-        self.midi_program = DEFAULT_MIDI_PROGRAM
+        self.cod_instrument = DEFAULT_MIDI_PROGRAM
 
-    def parseInput(self, input: str, debug:bool=False):
+    def parseInput(self, input: str, isDebug:bool=False):
         # A lista que vai conter as notas, silencios e instrumentos
         score = m21stream.Score()
 
@@ -57,13 +45,13 @@ class MusicParser:
         current_inst = m21stream.Part()
 
         # Adiciona instrumento padrao
-        current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
+        current_inst.append(m21inst.instrumentFromMidiProgram(self.cod_instrument))
 
         # Preparacao para o laço de parsing
         self.last_state = None
         offset = 0 # offset da música, em beats
 
-        if debug: print('= Input commands and parser settings: \n[{cmd}] ({offset}, {volume}, {octave}, {instrument})')
+        if isDebug: print('= Input commands and parser settings: \n[{cmd}] ({offset}, {volume}, {octave}, {instrument})')
 
         # Iterando sobre caracteres da entrada
         for char in input:
@@ -103,29 +91,29 @@ class MusicParser:
 
             elif char == '!':
                 # Instrumento Agogo #114
-                self.midi_program = 114
+                self.cod_instrument = 114
 
                 score.append(current_inst)
                 current_inst = m21stream.Part()
-                current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
+                current_inst.append(m21inst.instrumentFromMidiProgram(self.cod_instrument))
 
-            elif str(char).upper() in VOGAIS:
+            elif str(char).upper() in VOWELS:
                 # Intrumento Harpischord #7
-                self.midi_program = 7
+                self.cod_instrument = 7
 
                 score.append(current_inst)
                 current_inst = m21stream.Part()
-                current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
+                current_inst.append(m21inst.instrumentFromMidiProgram(self.cod_instrument))
 
-            elif char in DIGITOS:
+            elif char in DIGITS:
                 # Instrumento por soma de valor
-                aux_midi_prog = self.midi_program + int(char)
+                aux_midi_prog = self.cod_instrument + int(char)
                 if aux_midi_prog > MAX_MIDI_PROGRAM: aux_midi_prog = DEFAULT_MIDI_PROGRAM
-                self.midi_program = aux_midi_prog
+                self.cod_instrument = aux_midi_prog
 
                 score.append(current_inst)
                 current_inst = m21stream.Part()
-                current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
+                current_inst.append(m21inst.instrumentFromMidiProgram(self.cod_instrument))
 
             elif char in ['?', '.'] :
                 # Oitava ++
@@ -135,29 +123,29 @@ class MusicParser:
 
             elif char == '\n':
                 # Instrumento Tubular Bells #15
-                self.midi_program = 15
+                self.cod_instrument = 15
 
                 score.append(current_inst)
                 current_inst = m21stream.Part()
-                current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
+                current_inst.append(m21inst.instrumentFromMidiProgram(self.cod_instrument))
 
             elif char == ';':
                 # Instrumento Pan Flute #76
-                self.midi_program = 76
+                self.cod_instrument = 76
 
                 score.append(current_inst)
                 current_inst = m21stream.Part()
-                current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
+                current_inst.append(m21inst.instrumentFromMidiProgram(self.cod_instrument))
 
             elif char == ',':
                 # Instrumento Church Organ #20
-                self.midi_program = 20
+                self.cod_instrument = 20
 
                 score.append(current_inst)
                 current_inst = m21stream.Part()
-                current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
+                current_inst.append(m21inst.instrumentFromMidiProgram(self.cod_instrument))
 
-            elif str(char).upper() not in VOGAIS:
+            elif str(char).upper() not in VOWELS:
                 if str(self.last_state).upper() in VALID_NOTES:
                     # Repete ultima nota
                     current_inst.insert(offset, m21note.Note(self.last_state, octave=self.octave, volume=self.volume))
@@ -182,14 +170,14 @@ class MusicParser:
             # Atualiza registro de ultimo estado
             self.last_state = char
 
-            if debug:
-                curr_inst_name = m21inst.instrumentFromMidiProgram(self.midi_program).instrumentName
+            if isDebug:
+                curr_inst_name = m21inst.instrumentFromMidiProgram(self.cod_instrument).instrumentName
                 if char == ' ': print(f'[ ]', f'\t({offset}, \t{self.volume}, \t{self.octave}, \t{curr_inst_name})')
                 elif char == '\n': print('[NL]', f'\t({offset}, \t{self.volume}, \t{self.octave}, \t{curr_inst_name})')
                 else: print(f'[{char}]', f'\t({offset}, \t{self.volume}, \t{self.octave}, \t{curr_inst_name})')
 
         score.append(current_inst)
 
-        if debug: print('\n= Output stream:'); score.show('text')
+        if isDebug: print('\n= Output stream:'); score.show('text')
         
         return score

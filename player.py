@@ -1,24 +1,22 @@
-
 #================#
 #    IMPORTS     #
 #================#
 
-# Internal imports
-from music import *
-
-# External imports
 from tkinter import *
 from tkinter import filedialog as tkifd
 import pygame
 import os
 
+#================#
+#    CLASSES     #
+#================#
 
 class MusicPlayer:
     def __init__(self, window):
 
         self.window = window
         self.window.title("Player")
-        self.window.geometry("1000x320+200+200")
+        self.window.geometry("800x600")
 
         pygame.init()
         pygame.mixer.init()
@@ -104,7 +102,7 @@ class MusicPlayer:
         playbtn = Button(
             buttonframe,
             text="PLAYSONG",
-            command=self.playsong,
+            command=self.playSong,
             width=10,
             height=1,
             font=(
@@ -123,11 +121,11 @@ class MusicPlayer:
         playbtn = Button(
             buttonframe,
             text="PAUSE",
-            command=self.pausesong,
+            command=self.pauseSong,
             width=8,
             height=1,
             font=(
-                "times new roman",
+                "sans serif",
                 16,
                 "bold"
             ),
@@ -142,11 +140,11 @@ class MusicPlayer:
         playbtn = Button(
             buttonframe,
             text="UNPAUSE",
-            command=self.unpausesong,
+            command=self.unpauseSong,
             width=10,
             height=1,
             font=(
-                "times new roman",
+                "sans serif",
                 16,
                 "bold"
             ),
@@ -161,11 +159,11 @@ class MusicPlayer:
         playbtn = Button(
             buttonframe,
             text="STOPSONG",
-            command=self.stopsong,
+            command=self.stopSong,
             width=10,
             height=1,
             font=(
-                "times new roman",
+                "sans serif",
                 16,
                 "bold"
             ),
@@ -182,7 +180,7 @@ class MusicPlayer:
             self.window,
             text="Song Playlist",
             font=(
-                "times new roman",
+                "sans serif",
                 15,
                 "bold"),
             bg="grey",
@@ -198,7 +196,7 @@ class MusicPlayer:
             selectbackground="gold",
             selectmode=SINGLE,
             font=(
-                "times new roman",
+                "sans serif",
                 12,
                 "bold"),
             bg="silver",
@@ -257,30 +255,32 @@ class MusicPlayer:
         parse_file_button = Button(text='Parse file', command=parseFile)
         parse_file_button.place(x=610, y=230, width=75, height=20)
 
-    def playsong(self):
-        self.track.set(self.playlist.get(ACTIVE))
-        self.status.set("-Playing")
-        pygame.mixer.music.load(self.playlist.get(ACTIVE))
-        pygame.mixer.music.play()
+    def playSong(self):
+        current_song = self.playlist.get(ACTIVE)
+        music = pygame.mixer.music
 
-    def stopsong(self):
+        self.track.set(current_song)
+        self.status.set("-Playing")
+        
+        music.load(current_song)
+        music.play()
+
+    def stopSong(self):
         self.status.set("-Stopped")
         pygame.mixer.music.stop()
 
-    def pausesong(self):
+    def pauseSong(self):
         self.status.set("-Paused")
         pygame.mixer.music.pause()
 
-    def unpausesong(self):
+    def unpauseSong(self):
         self.status.set("-Playing")
         pygame.mixer.music.unpause()
-
 
 def main():
     window = Tk()
     MusicPlayer(window)
     window.mainloop()
-
 
 if __name__ == "__main__":
     main()
