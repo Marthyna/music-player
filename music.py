@@ -7,6 +7,14 @@
 from note import *
 
 # External imports
+#================#
+#    IMPORTS     #
+#================#
+
+# Internal imports
+from note import *
+
+# External imports
 from music21 import stream as m21stream
 from music21 import instrument as m21inst
 from music21 import note as m21note
@@ -21,7 +29,7 @@ DEFAULT_OCTAVE = 4
 
 MAX_MIDI_PROGRAM = 127
 MAX_VOLUME = 127
-MAX_OCTAVE = 8
+MAX_OCTAVE = 7
 
 VOGAIS = ['A', 'E', 'I', 'O', 'U']
 DIGITOS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -32,13 +40,16 @@ DIGITOS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 class MusicParser:
     def __init__(self):
+        # Guarda o ultimo comando lido
         self.last_state = None
 
+        # Registros atuais de volume,
+        # oitava e instrumento
         self.volume = DEFAULT_VOLUME
         self.octave = DEFAULT_OCTAVE
         self.midi_program = DEFAULT_MIDI_PROGRAM
 
-    def parseInput(self, input: str):
+    def parseInput(self, input: str, debug:bool=False):
         # A lista que vai conter as notas, silencios e instrumentos
         score = m21stream.Score()
 
@@ -48,44 +59,47 @@ class MusicParser:
         # Adiciona instrumento padrao
         current_inst.append(m21inst.instrumentFromMidiProgram(self.midi_program))
 
-
+        # Preparacao para o laço de parsing
         self.last_state = None
-        offset = -1
+        offset = 0 # offset da música, em beats
 
-        print('= Input commands:')
+        if debug: print('= Input commands and parser settings: \n[{cmd}] ({offset}, {volume}, {octave}, {instrument})')
 
         # Iterando sobre caracteres da entrada
         for char in input:
-            offset += 1
-
-            print(char) # debug
-
-            print(offset)
+            
             if str(char).upper() in VALID_NOTES:
-                # A or a, B or b, C or c, ...
+                # A ou a, B ou b, C ou c, ...
 
                 if char in VALID_NOTES:
                     # A, B, C, ...
                     # Adiciona nota
 
                     # Não precisamos passar pela classe Note pra gerar uma nota
-                    current_inst.insert(offset, m21note.Note(char, octave=self.octave))
+                    current_inst.insert(offset, m21note.Note(char, octave=self.octave, volume=self.volume))
 
                 else:
                     # a, b, c, ...
                     if str(self.last_state).upper() in VALID_NOTES:
                         # Repete ultima nota
-                        current_inst.insert(offset, m21note.Note(self.last_state, octave=self.octave))
+                        current_inst.insert(offset, m21note.Note(self.last_state, octave=self.octave, volume=self.volume))
                     else:
                         # Adiciona silencio
                         current_inst.insert(offset, m21note.Rest())
 
+                # Soma ao offset da música
+                offset += 1
+
             elif char == ' ':
                 # volume
+
                 if self.volume != MAX_VOLUME:
                     aux_volume = 2*self.volume
-                    if(aux_volume > MAX_VOLUME): aux_volume = MAX_VOLUME
+                    # Saturar no maximo
+                    if(aux_volume >= MAX_VOLUME): aux_volume = MAX_VOLUME
                     self.volume = aux_volume
+                else: 
+                    self.volume = DEFAULT_VOLUME
 
             elif char == '!':
                 # Instrumento Agogo #114
@@ -116,8 +130,8 @@ class MusicParser:
             elif char in ['?', '.'] :
                 # Oitava ++
                 aux_octave = self.octave + 1
-                if aux_octave > MAX_OCTAVE: aux_octave = DEFAULT_OCTAVE
-                self.octave = aux.octave
+                if aux_octave >= MAX_OCTAVE: aux_octave = DEFAULT_OCTAVE
+                self.octave = aux_octave
 
             elif char == '\n':
                 # Instrumento Tubular Bells #15
@@ -146,25 +160,36 @@ class MusicParser:
             elif str(char).upper() not in VOGAIS:
                 if str(self.last_state).upper() in VALID_NOTES:
                     # Repete ultima nota
-                    current_inst.insert(offset, m21note.Note(self.last_state, octave=self.octave))
+                    current_inst.insert(offset, m21note.Note(self.last_state, octave=self.octave, volume=self.volume))
                 else:
                     # Adiciona silencio
                     current_inst.insert(offset, m21note.Rest())
+
+                # Soma ao offset da música
+                offset += 1
 
             else:
                 if self.last_state.str.upper() in VALID_NOTES:
                     # Repete ultima nota
-                    current_inst.insert(offset, m21note.Note(self.last_state, octave=self.octave))
+                    current_inst.insert(offset, m21note.Note(self.last_state, octave=self.octave, volume=self.volume))
                 else:
                     # Adiciona silencio
                     current_inst.insert(offset, m21note.Rest())
 
+                # Soma ao offset da música
+                offset += 1
+
             # Atualiza registro de ultimo estado
             self.last_state = char
 
+            if debug:
+                curr_inst_name = m21inst.instrumentFromMidiProgram(self.midi_program).instrumentName
+                if char == ' ': print(f'[ ]', f'\t({offset}, \t{self.volume}, \t{self.octave}, \t{curr_inst_name})')
+                elif char == '\n': print('[NL]', f'\t({offset}, \t{self.volume}, \t{self.octave}, \t{curr_inst_name})')
+                else: print(f'[{char}]', f'\t({offset}, \t{self.volume}, \t{self.octave}, \t{curr_inst_name})')
+
         score.append(current_inst)
 
-        print('\n= Output stream:')
-        score.show('text')
+        if debug: print('\n= Output stream:'); score.show('text')
         
         return score
