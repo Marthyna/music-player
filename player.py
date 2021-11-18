@@ -1,4 +1,14 @@
+
+#================#
+#    IMPORTS     #
+#================#
+
+# Internal imports
+from music import *
+
+# External imports
 from tkinter import *
+from tkinter import filedialog as tkifd
 import pygame
 import os
 
@@ -8,7 +18,7 @@ class MusicPlayer:
 
         self.window = window
         self.window.title("Player")
-        self.window.geometry("1000x200+200+200")
+        self.window.geometry("1000x320+200+200")
 
         pygame.init()
         pygame.mixer.init()
@@ -204,6 +214,48 @@ class MusicPlayer:
         songtracks = os.listdir()
         for track in songtracks:
             self.playlist.insert(END, track)
+
+        name_label = Label(self.window, text="File name")
+        name_label.place(x=0, y=200, width=75, height=20)
+        name_entry = Entry(self.window)
+        name_entry.place(x=75, y=200, width=525, height=20)
+
+        song_label = Label(self.window, text="Song input")
+        song_label.place(x=0, y=220, width=75, height=20)
+        song_text = Text(self.window)
+        song_text.place(x=75, y=220, width=525, height=100)
+
+        def parseTextEntry():
+            text_to_parse = song_text.get("1.0", END)
+            if (text_to_parse == None) or (text_to_parse == ""):
+                return
+            file_name_start = name_entry.get()
+            if (file_name_start == None) or (file_name_start == ""):
+                return
+            music_parser = MusicParser()
+            stream = music_parser.parseInput(text_to_parse)
+            file_name = file_name_start + ".mid"
+            stream.write('midi', fp=file_name)
+            self.playlist.insert(END, file_name)
+
+        parse_song_button = Button(text='Parse song', command=parseTextEntry)
+        parse_song_button.place(x=610, y=200, width=75, height=20)
+
+        def parseFile():
+            name_to_parse = tkifd.askopenfilename()
+            if (name_to_parse == None) or (name_to_parse == ""):
+                return
+            file_to_parse = open(name_to_parse)
+            text_to_parse = file_to_parse.read()
+            print(text_to_parse)
+            music_parser = MusicParser()
+            stream = music_parser.parseInput(text_to_parse)
+            file_name = name_entry.get() + ".mid"
+            stream.write('midi', fp=file_name)
+            self.playlist.insert(END, file_name)
+
+        parse_file_button = Button(text='Parse file', command=parseFile)
+        parse_file_button.place(x=610, y=230, width=75, height=20)
 
     def playsong(self):
         self.track.set(self.playlist.get(ACTIVE))
