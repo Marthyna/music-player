@@ -255,10 +255,15 @@ class MusicPlayer:
 
         # Funcao que traduz o conteudo de um .txt em um Score
         def uploadAndParseFromFile():
+            file_name_start = save_file_name_field.get()
+            if (file_name_start == None) or (file_name_start == ""):
+                self.error_message.set("Must enter name to save file as")
+                return
+            file_name = file_name_start + ".mid"
             # abre janela pedindo pelo arquivo e o valida
             name_to_parse = tkifd.askopenfilename()
             if (name_to_parse == None) or (name_to_parse == ""):
-                self.error_message.set("Must enter name to save file as")
+                self.error_message.set("Must select file to upload")
                 return
             self.error_message.set("")
 
@@ -271,7 +276,6 @@ class MusicPlayer:
             self.stream = music_parser.parseInput(text_to_parse)
 
             # salva Score para arquivo de nome lido do campo
-            file_name = save_file_name_field.get() + ".mid"
             self.stream.write('midi', fp=file_name)
             self.playlist.insert(END, file_name)
 
@@ -378,10 +382,12 @@ class MusicPlayer:
         self.status.set("-Playing")
         pygame.mixer.music.unpause()
 
+
 def main():
     window = Tk()
     MusicPlayer(window)
     window.mainloop()
+
 
 if __name__ == "__main__":
     main()
