@@ -1,6 +1,6 @@
-import music
+import music_parser
 
-parser = music.MusicParser()
+parser = music_parser.MusicParser()
 
 # input = 'A.A.A...A\nC Ee e!aFa;Eaa'
 input = '7E. G.... E.. G;...FCG .G'
