@@ -314,8 +314,8 @@ class MusicPlayer:
         def parseTextEntry():
             # pega o texto a ser convertido do campo e o valida
             text_to_parse = text_input_field.get("1.0", END)
-            if (text_to_parse == None) or (text_to_parse == ""):
-                self.error_message.set("Must enter name to save file as")
+            if (text_to_parse == None) or (text_to_parse == "\n"):
+                self.error_message.set("Must enter text to parse")
                 return
 
             # pega o nome inicial do arquivo do campo e o valida
