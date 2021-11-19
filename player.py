@@ -349,34 +349,39 @@ class MusicPlayer:
         )
         error_label.place(x=10, y=390, width=200, height=20)
 
+    # funcao que toca a musica
     def playSong(self):
+        # pega a musica atualmente selecionada da playlist
         current_song = self.playlist.get(ACTIVE)
         music = pygame.mixer.music
 
+        # seta os textos
         self.track.set(current_song)
         self.status.set("-Playing")
 
+        # inicia a reproducao
         music.load(current_song)
         music.play()
 
+    # para a musica
     def stopSong(self):
         self.status.set("-Stopped")
         pygame.mixer.music.stop()
 
+    # pausa a musica
     def pauseSong(self):
         self.status.set("-Paused")
         pygame.mixer.music.pause()
 
+    # despausa a musica
     def unpauseSong(self):
         self.status.set("-Playing")
         pygame.mixer.music.unpause()
-
 
 def main():
     window = Tk()
     MusicPlayer(window)
     window.mainloop()
-
 
 if __name__ == "__main__":
     main()
