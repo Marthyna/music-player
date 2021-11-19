@@ -250,7 +250,7 @@ class MusicPlayer:
         # Campo para o nome do arquivo a ser salvo
         save_file_name_label = Label(uploadFrame, text="Save song as:")
         save_file_name_label.place(x=10, y=10, width=75, height=25)
-        save_file_name_field = Text(uploadFrame)
+        save_file_name_field = Entry(uploadFrame)
         save_file_name_field.place(x=90, y=10, width=342, height=25)
 
         # Funcao que traduz o conteudo de um .txt em um Score
@@ -307,7 +307,7 @@ class MusicPlayer:
         # Campo para o nome do arquivo a ser salvo
         file_name_label = Label(inputFrame, text="Save song as:")
         file_name_label.place(x=15, y=80, width=75, height=25)
-        file_name_field = Text(inputFrame)
+        file_name_field = Entry(inputFrame)
         file_name_field.place(x=100, y=80, width=430, height=25)
 
         # Funcao de parsing do texto de entrada
