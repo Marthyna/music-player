@@ -20,7 +20,7 @@ class MusicPlayer:
         # Cria configuracoes GUI iniciais
         self.window = window
         self.window.title("Player")
-        self.window.geometry("635x390")
+        self.window.geometry("635x410")
 
         # Inicializa o player de musica
         pygame.init()
@@ -29,6 +29,7 @@ class MusicPlayer:
         # Inicializa variaveis da classe
         self.track = StringVar(self.window, "Track name")
         self.status = StringVar(self.window, "Status")
+        self.error_message = StringVar()
         self.stream = None
 
         # Frame interno para o player
@@ -257,9 +258,11 @@ class MusicPlayer:
             # abre janela pedindo pelo arquivo e o valida
             name_to_parse = tkifd.askopenfilename()
             if (name_to_parse == None) or (name_to_parse == ""):
+                self.error_message.set("Must enter name to save file as")
                 return
+            self.error_message.set("")
 
-            # abre o arquivo e le    
+            # abre o arquivo e le
             file_to_parse = open(name_to_parse)
             text_to_parse = file_to_parse.read()
 
@@ -270,10 +273,11 @@ class MusicPlayer:
             # salva Score para arquivo de nome lido do campo
             file_name = save_file_name_field.get() + ".mid"
             self.stream.write('midi', fp=file_name)
-            self.playlist.insert(END, file_name)            
+            self.playlist.insert(END, file_name)
 
         # Botao de upload/salvamento do arquivo
-        parse_file_button = Button(uploadFrame, text='Parse from File', command=uploadAndParseFromFile)
+        parse_file_button = Button(
+            uploadFrame, text='Parse from File', command=uploadAndParseFromFile)
         parse_file_button.place(x=440, y=10, width=95, height=25)
 
         # ------------- INPUT DE TEXTO ----------------------
@@ -292,7 +296,7 @@ class MusicPlayer:
             y=230,
             width=635,
             height=150
-        )        
+        )
 
         # Campo para o texto de entrada
         text_input_label = Label(inputFrame, text="Text input:")
@@ -311,12 +315,15 @@ class MusicPlayer:
             # pega o texto a ser convertido do campo e o valida
             text_to_parse = text_input_field.get("1.0", END)
             if (text_to_parse == None) or (text_to_parse == ""):
+                self.error_message.set("Must enter name to save file as")
                 return
-            
+
             # pega o nome inicial do arquivo do campo e o valida
             file_name_start = file_name_field.get()
             if (file_name_start == None) or (file_name_start == ""):
+                self.error_message.set("Must enter name to save file as")
                 return
+            self.error_message.set("")
 
             # inicia o parser e traduz o texto em um Score
             music_parser = MusicParser()
@@ -330,8 +337,17 @@ class MusicPlayer:
             self.playlist.insert(END, file_name)
 
         # Botao de parsing do texto de entrada
-        parse_song_button = Button(inputFrame, text='Parse song', command=parseTextEntry)
+        parse_song_button = Button(
+            inputFrame, text='Parse song', command=parseTextEntry)
         parse_song_button.place(x=540, y=80, width=75, height=25)
+
+        # Messagem de erro, caso tenha algum.
+        error_label = Label(
+            self.window,
+            textvariable=self.error_message,
+            fg="red"
+        )
+        error_label.place(x=10, y=390, width=200, height=20)
 
     def playSong(self):
         current_song = self.playlist.get(ACTIVE)
